@@ -20,14 +20,20 @@ def preencher(campo, texto):
     time.sleep(0.0003)
 
 @when(u'clico em Entrar')
-def step_impl(context): 
-    # Abre o menu mobile
-    WebDriverWait(context.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div[data-node-type='hamburger-menu'] button.lw-topbar-hamburger-button"))).click()
+def step_impl(context):
+    menu = WebDriverWait(context.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div[data-node-type='hamburger-menu'] button.lw-topbar-hamburger-button")))
+    menu.click()
 
-    # Seleciona a opção Entrar
     WebDriverWait(context.driver, 15).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "ul.mobile-nav-menu")))
-    elemento = WebDriverWait(context.driver, 15).until(EC.element_to_be_clickable((By.XPATH, "//ul[contains(@class,'mobile-nav-menu')]//span[normalize-space()='Entrar']"))); elemento.click()
-    
+
+    seletor = (By.XPATH, "//ul[contains(@class,'mobile-nav-menu')]//span[normalize-space()='Entrar']")
+    elementos = WebDriverWait(context.driver, 15).until(EC.presence_of_all_elements_located(seletor))
+
+    elemento = next((e for e in elementos if e.is_displayed()), None)
+    assert elemento is not None, "Opção Entrar não encontrada no menu mobile"
+
+    context.driver.execute_script("arguments[0].click();", elemento)
+
 @when(u'preencho os campos de login')
 def step_impl(context):   
     email = os.getenv("ITERASYS_EMAIL")
@@ -63,21 +69,23 @@ def step_impl(context):
     context.driver.find_element(By.CSS_SELECTOR, "#personal-details button").click() 
 
 @when(u'preencho os campos Nome {Nome} e E-mail {Email}')
-def step_impl(context, Nome, Email):   
+def step_impl(context, Nome, Email):
+    # Preenche o nome
     nome = WebDriverWait(context.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-testid='personal-details-username-input']")))
-    email = WebDriverWait(context.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-testid='personal-details-email-input']")))
-
+    context.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", nome)
     nome.click()
     nome.send_keys(Keys.CONTROL, "a")
     nome.send_keys(Keys.BACKSPACE)
+    nome.send_keys(Nome)
 
+    # Preenche o email
+    email = WebDriverWait(context.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-testid='personal-details-email-input']")))
+    context.driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", email)
     email.click()
     email.send_keys(Keys.CONTROL, "a")
     email.send_keys(Keys.BACKSPACE)
-
-    nome.send_keys(Nome)
     email.send_keys(Email)
-              
+    
 @when(u'clico no botão Salvar')
 def step_impl(context):
     context.driver.find_element( By.CSS_SELECTOR, "#personal-details button.lw-brand-text").click()
@@ -88,16 +96,16 @@ def step_impl(context):
 @when(u'preencho os campos Nome  e E-mail {Email}')
 def step_impl(context, Email):
     nome = WebDriverWait(context.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-testid='personal-details-username-input']")))
-    email = WebDriverWait(context.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-testid='personal-details-email-input']")))
-
+    context.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", nome)
     nome.click()
     nome.send_keys(Keys.CONTROL, "a")
     nome.send_keys(Keys.BACKSPACE)
 
+    email = WebDriverWait(context.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-testid='personal-details-email-input']")))
+    context.driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", email)
     email.click()
     email.send_keys(Keys.CONTROL, "a")
     email.send_keys(Keys.BACKSPACE)
-
     email.send_keys(Email)
 
 # =============
@@ -106,17 +114,17 @@ def step_impl(context, Email):
 @when(u'preencho os campos Nome {Nome} e E-mail ')
 def step_impl(context, Nome):
     nome = WebDriverWait(context.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-testid='personal-details-username-input']")))
-    email = WebDriverWait(context.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-testid='personal-details-email-input']")))
-
+    context.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", nome)
     nome.click()
     nome.send_keys(Keys.CONTROL, "a")
     nome.send_keys(Keys.BACKSPACE)
+    nome.send_keys(Nome)
 
+    email = WebDriverWait(context.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-testid='personal-details-email-input']")))
+    context.driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", email)
     email.click()
     email.send_keys(Keys.CONTROL, "a")
     email.send_keys(Keys.BACKSPACE)
-
-    nome.send_keys(Nome)
 
 # ===============
 # VALIDAR DADOS 
