@@ -1,0 +1,149 @@
+# 1 - Bibliotecas / Imports
+from behave import given, when, then
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import os
+
+# ==========================
+# FUNÇÃO AUXILIAR DE SCROLL
+# ==========================
+def posicionar_campo(context, campo):
+    context.driver.execute_script("arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'nearest'});", campo)
+
+# ===================================
+# ALTERAR SENHA COM DADOS VÁLIDOS
+# ===================================   
+@when(u'clico no botao Editar na secçao Segurança da conta')
+def step_impl(context):
+    elemento = WebDriverWait(context.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#security button.learnworlds-button-small"))); elemento.click()
+    context.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", context.driver.find_elements(By.CSS_SELECTOR, "#security input[type='password']")[0])
+
+@when(u'preencho os campos senha atual, nova senha e confirmação da nova senha')
+def step_impl(context):
+    senha_atual = os.getenv("ITERASYS_CURRENT_PASSWORD")
+    nova_senha = os.getenv("ITERASYS_NEW_PASSWORD")
+
+    campos = WebDriverWait(context.driver, 10).until(EC.visibility_of_all_elements_located((By.CSS_SELECTOR, "#security input[type='password']")))
+
+    posicionar_campo(context, campos[0])
+    time.sleep(0.3)
+    campos[0].click()
+    campos[0].send_keys(senha_atual)
+
+    posicionar_campo(context, campos[1])
+    time.sleep(0.3)
+    campos[1].click()
+    campos[1].send_keys(nova_senha)
+
+    posicionar_campo(context, campos[2])
+    time.sleep(0.3)
+    campos[2].click()
+    campos[2].send_keys(nova_senha)
+
+@when(u'clico no botao Salvar da Segurança da conta')
+def step_impl(context):
+    context.driver.find_element(By.CSS_SELECTOR, "#security button.lw-brand-text").click()
+
+# ===================================
+# ALTERAR SENHA COM DADOS INVÁLIDOS
+# ===================================   
+# ====================
+# SENHA ATUAL VAZIA
+# =====================
+@when(u'preencho os campos senha atual , nova senha VALIDA e confirmação da nova senha VALIDA')
+def step_impl(context):
+    nova_senha = os.getenv("ITERASYS_NEW_PASSWORD")
+
+    campos = WebDriverWait(context.driver, 10).until(EC.visibility_of_all_elements_located((By.CSS_SELECTOR, "#security input[type='password']")))
+
+    posicionar_campo(context, campos[0])
+    campos[0].click()
+
+    posicionar_campo(context, campos[1])
+    time.sleep(0.3)
+    campos[1].click()
+    campos[1].send_keys(nova_senha)
+
+    posicionar_campo(context, campos[2])
+    time.sleep(0.3)
+    campos[2].click()
+    campos[2].send_keys(nova_senha)
+
+# ==================
+# NOVA SENHA VAZIA
+# ==================
+@when(u'preencho os campos senha atual VALIDA, nova senha  e confirmação da nova senha VALIDA')
+def step_impl(context):
+    senha_atual = os.getenv("ITERASYS_CURRENT_PASSWORD")
+    nova_senha = os.getenv("ITERASYS_NEW_PASSWORD")
+
+    campos = WebDriverWait(context.driver, 10).until(EC.visibility_of_all_elements_located((By.CSS_SELECTOR, "#security input[type='password']")))
+
+    posicionar_campo(context, campos[0])
+    time.sleep(0.3)
+    campos[0].click()
+    campos[0].send_keys(senha_atual)
+
+    posicionar_campo(context, campos[1])
+    campos[1].click()
+
+    posicionar_campo(context, campos[2])
+    time.sleep(0.3)
+    campos[2].click()
+    campos[2].send_keys(nova_senha)
+
+# ==================================
+# CONFIRMAÇÃO DA NOVA SENHA VAZIA
+# ==================================
+@when(u'preencho os campos senha atual VALIDA, nova senha VALIDA e confirmação da nova senha ')
+def step_impl(context):
+    senha_atual = os.getenv("ITERASYS_CURRENT_PASSWORD")
+    nova_senha = os.getenv("ITERASYS_NEW_PASSWORD")
+
+    campos = WebDriverWait(context.driver, 10).until(EC.visibility_of_all_elements_located((By.CSS_SELECTOR, "#security input[type='password']")))
+
+    posicionar_campo(context, campos[0])
+    time.sleep(0.3)
+    campos[0].click()
+    campos[0].send_keys(senha_atual)
+
+    posicionar_campo(context, campos[1])
+    time.sleep(0.3)
+    campos[1].click()
+    campos[1].send_keys(nova_senha)
+
+    posicionar_campo(context, campos[2])
+    campos[2].click()
+
+# ================================
+# NOVA SENHA COM FORMATO INVÁLIDO
+# ================================
+@when(u'preencho os campos senha atual VALIDA, nova senha INVALIDA e confirmação da nova senha INVALIDA')
+def step_impl(context):
+    senha_atual = os.getenv("ITERASYS_CURRENT_PASSWORD")
+    nova_senha = "abc"
+
+    campos = WebDriverWait(context.driver, 10).until(EC.visibility_of_all_elements_located((By.CSS_SELECTOR, "#security input[type='password']")))
+
+    posicionar_campo(context, campos[0])
+    campos[0].send_keys(senha_atual)
+
+    posicionar_campo(context, campos[1])
+    campos[1].send_keys(nova_senha)
+
+    posicionar_campo(context, campos[2])
+    campos[2].send_keys(nova_senha)
+
+# =================
+# VALIDAR DADOS
+# =================   
+@then(u'senha é atualizada com sucesso')
+def step_impl(context):
+    erros = context.driver.find_elements(By.CSS_SELECTOR, "#security .lw-red-text")
+    assert len(erros) == 0, f"Erro encontrado: {[erro.text for erro in erros]}"
+
+@then(u'exibe a {mensagem} com erro') 
+def step_impl(context, mensagem): 
+    assert context.driver.find_element(By.CSS_SELECTOR,"#security span.lw-red-text").text == mensagem

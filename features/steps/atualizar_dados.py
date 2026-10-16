@@ -35,7 +35,7 @@ def step_impl(context):
     context.driver.execute_script("arguments[0].click();", elemento)
 
 @when(u'preencho os campos de login')
-def step_impl(context):   
+def step_impl(context): 
     email = os.getenv("ITERASYS_EMAIL")
     senha = os.getenv("ITERASYS_PASSWORD")
 
