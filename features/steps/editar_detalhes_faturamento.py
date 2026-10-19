@@ -66,5 +66,6 @@ def step_impl(context):
 
 @then(u'a {mensagem} é exibida')
 def step_impl(context, mensagem):
+    context.driver.execute_script("window.scrollTo({top: document.documentElement.scrollHeight, behavior: 'instant'});")
     elemento = WebDriverWait(context.driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".iziToast-title")))
     assert elemento.text == mensagem
